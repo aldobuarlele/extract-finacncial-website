@@ -50,3 +50,13 @@ coverage/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+
+pg_data/
+redis_data/
+
+backend/app/storage/*
+!backend/app/storage/.gitkeep
+
+.docker/
+docker-compose.override.yml
