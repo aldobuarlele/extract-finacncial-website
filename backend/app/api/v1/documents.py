@@ -37,8 +37,13 @@ async def upload_document(
     db.add(new_report)
     db.commit()
     db.refresh(new_report)
-    
-    background_tasks.add_task(ReceiptExtractorService.process_document_task, new_report.id)
+
+    background_tasks.add_task(
+    ReceiptExtractorService.process_document_task, 
+    new_report.id, 
+    content, 
+    file.content_type
+    )    
     
     return {
         "message": "Document accepted and queued for processing",
