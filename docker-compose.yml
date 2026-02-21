@@ -21,6 +21,8 @@ services:
     build: ./backend
     ports:
       - "8000:8000"
+    volumes:
+      - ./backend:/app
     environment:
       - ENVIRONMENT=development
       - DATABASE_URL=postgresql://admin:securepassword123@postgres_db:5432/expense_intel_db
