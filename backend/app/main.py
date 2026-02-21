@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.api.v1 import categories, transactions
+from app.api.v1 import categories, transactions, documents
+from app.api.middlewares.size_validator import MaxBodySizeMiddleware
 
 app = FastAPI(
     title="Expense Intelligence API",
@@ -16,8 +17,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(categories.router, prefix=f"{settings.API_V1_STR}/categories", tags=["categories"])
+app.add_middleware(MaxBodySizeMiddleware, max_size=5 * 1024 * 1024)
+
+app.include_router(documents.router, prefix=f"{settings.API_V1_STR}/documents", tags=["documents"])
 app.include_router(transactions.router, prefix=f"{settings.API_V1_STR}/transactions", tags=["transactions"])
+app.include_router(categories.router, prefix=f"{settings.API_V1_STR}/categories", tags=["categories"])
 
 @app.get("/health")
 async def health_check():
