@@ -10,7 +10,8 @@ def seed_categories():
             {"name": "Transportation", "sub": ["Fuel", "Parking", "Public Transport", "Ride Hailing"]},
             {"name": "Bills & Utilities", "sub": ["Electricity", "Water", "Internet", "Phone Credit"]},
             {"name": "Shopping", "sub": ["Clothing", "Electronics", "Hobbies"]},
-            {"name": "Health", "sub": ["Pharmacy", "Doctor", "Gym"]}
+            {"name": "Health", "sub": ["Pharmacy", "Doctor", "Gym"]},
+            {"name": "Others", "sub": ["Others"]}
         ]
 
         for item in categories_data:

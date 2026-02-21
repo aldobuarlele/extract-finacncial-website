@@ -1,6 +1,6 @@
 import uuid
 import enum
-from sqlalchemy import Column, String, Text, DateTime, Date, Numeric, ForeignKey, Enum, func
+from sqlalchemy import Column, String, Text, DateTime, Date, Numeric, ForeignKey, Enum, func, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.db.database import Base
@@ -36,6 +36,10 @@ class DocumentReport(Base):
     status = Column(Enum(ReportStatus), default=ReportStatus.PENDING, nullable=False)
     uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
     error_message = Column(Text, nullable=True)
+    
+    prompt_tokens = Column(Integer, nullable=True)
+    completion_tokens = Column(Integer, nullable=True)
+    total_tokens = Column(Integer, nullable=True)
 
     transactions = relationship("ExpenseTransaction", back_populates="report")
 

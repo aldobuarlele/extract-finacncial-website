@@ -17,13 +17,18 @@ class ReceiptExtractorService:
             report.status = ReportStatus.PROCESSING
             db.commit()
 
-            extracted_data = await ai_client.extract_receipt_data(file_content, mime_type)
+            extracted_data, usage = await ai_client.extract_receipt_data(file_content, mime_type)
             
             print(f"--- AI EXTRACTION RESULT FOR {report.filename} ---")
             print(extracted_data)
+            print(f"Usage: {usage}")
             print("--------------------------------------------------")
 
-            if extracted_data:
+            if extracted_data and usage:
+                report.prompt_tokens = usage["prompt_tokens"]
+                report.completion_tokens = usage["completion_tokens"]
+                report.total_tokens = usage["total_tokens"]
+
                 fallback_category = db.query(ExpenseCategory).filter(
                     ExpenseCategory.name.ilike("%Others%")
                 ).first()
@@ -59,7 +64,7 @@ class ReceiptExtractorService:
                 report.status = ReportStatus.COMPLETED
             else:
                 report.status = ReportStatus.FAILED
-                report.error_message = "AI returned empty data"
+                report.error_message = "AI returned empty data or usage metadata"
 
             db.commit()
 

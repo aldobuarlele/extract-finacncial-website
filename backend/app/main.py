@@ -3,6 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.v1 import categories, transactions, documents
 from app.api.middlewares.size_validator import MaxBodySizeMiddleware
+from app.db.database import engine, Base
+from app.models import domain 
+from app.db.seed import seed_categories
+
+Base.metadata.drop_all(bind=engine)
+Base.metadata.create_all(bind=engine)
+seed_categories()
 
 app = FastAPI(
     title="Expense Intelligence API",

@@ -4,13 +4,17 @@ import json
 
 class GeminiClient:
     def __init__(self):
+        if not settings.GEMINI_API_KEY:
+            raise ValueError("GEMINI_API_KEY tidak ditemukan")
+            
+        genai.configure(api_key=settings.GEMINI_API_KEY)
         self.model_name = 'gemini-2.5-flash' 
         
         self.model = genai.GenerativeModel(
             model_name=self.model_name,
             generation_config={"response_mime_type": "application/json"}
         )
-        print(f"DEBUG: GeminiClient switching to flagship model: {self.model_name}")
+        print(f"DEBUG: GeminiClient initialized with model: {self.model_name}")
 
     async def extract_receipt_data(self, image_content: bytes, mime_type: str):
         prompt = """
@@ -29,17 +33,17 @@ class GeminiClient:
                 {"mime_type": mime_type, "data": image_content}
             ])
             
+            usage = {
+                "prompt_tokens": response.usage_metadata.prompt_token_count,
+                "completion_tokens": response.usage_metadata.candidates_token_count,
+                "total_tokens": response.usage_metadata.total_token_count
+            }
+            
             if response and response.text:
-                return json.loads(response.text)
-            return None
+                return json.loads(response.text), usage
+            return None, None
             
         except Exception as e:
             print(f"--- AI EXTRACTION ERROR ---")
             print(f"Detail: {str(e)}")
-            
-            if "404" in str(e):
-                print("DEBUG: Checking available models for your API Key...")
-                available_models = [m.name for m in genai.list_models()]
-                print(f"DEBUG: Your available models: {available_models}")
-                
-            return None
+            return None, None
