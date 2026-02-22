@@ -1,5 +1,6 @@
 import google.generativeai as genai
 from app.core.config import settings
+from app.core.circuit_breaker import gemini_breaker 
 import json
 
 class GeminiClient:
@@ -16,6 +17,7 @@ class GeminiClient:
         )
         print(f"DEBUG: GeminiClient initialized with model: {self.model_name}")
 
+    @gemini_breaker 
     async def extract_receipt_data(self, image_content: bytes, mime_type: str):
         prompt = """
         Analyze this document and extract information in JSON format:
@@ -46,4 +48,4 @@ class GeminiClient:
         except Exception as e:
             print(f"--- AI EXTRACTION ERROR ---")
             print(f"Detail: {str(e)}")
-            return None, None
+            raise e

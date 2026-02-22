@@ -1,16 +1,15 @@
-from fastapi import APIRouter, Depends, UploadFile, File, status, BackgroundTasks
+from fastapi import APIRouter, Depends, UploadFile, File, status
 from sqlalchemy.orm import Session
 import uuid
 from app.db.database import get_db
 from app.models.domain import DocumentReport, ReportStatus
 from app.utils.file_hashing import calculate_hash
-from app.services.extractors.receipt_extractor import ReceiptExtractorService 
+from app.worker import process_document_task_celery 
 
 router = APIRouter()
 
 @router.post("/upload", status_code=status.HTTP_202_ACCEPTED)
 async def upload_document(
-    background_tasks: BackgroundTasks,
     file: UploadFile = File(...), 
     db: Session = Depends(get_db)
 ):
@@ -37,12 +36,10 @@ async def upload_document(
     db.add(new_report)
     db.commit()
     db.refresh(new_report)
-
-    background_tasks.add_task(
-    ReceiptExtractorService.process_document_task, 
-    new_report.id, 
-    content, 
-    file.content_type
+    process_document_task_celery.delay(
+        str(new_report.id), 
+        content, 
+        file.content_type
     )    
     
     return {
