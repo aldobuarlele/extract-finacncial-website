@@ -4,24 +4,21 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from io import BytesIO
 from sqlalchemy.orm import Session
-from app.models.domain import DocumentReport, ExpenseTransaction
+from app.models.domain import DocumentReport, ExpenseTransaction, ExpenseCategory
 import datetime
 
 def generate_expense_pdf(report_id, db: Session):
     report = db.query(DocumentReport).filter(DocumentReport.id == report_id).first()
-    transactions = db.query(ExpenseTransaction).filter(ExpenseTransaction.report_id == report_id).all()
+    
+    transactions = db.query(ExpenseTransaction).join(ExpenseCategory)\
+        .filter(ExpenseTransaction.report_id == report_id).all()
     
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4)
     elements = []
     styles = getSampleStyleSheet()
 
-    title_style = ParagraphStyle(
-        'TitleStyle',
-        parent=styles['Title'],
-        fontSize=18,
-        spaceAfter=20
-    )
+    title_style = ParagraphStyle('TitleStyle', parent=styles['Title'], fontSize=18, spaceAfter=20)
     elements.append(Paragraph(f"Expense Intelligence Report", title_style))
     elements.append(Paragraph(f"Filename: {report.filename}", styles['Normal']))
     elements.append(Paragraph(f"Date Exported: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}", styles['Normal']))
@@ -31,24 +28,26 @@ def generate_expense_pdf(report_id, db: Session):
     
     total_amount = 0
     for tx in transactions:
+        category_name = tx.category.name if tx.category else "Uncategorized"
+        transaction_type = tx.type.name if hasattr(tx.type, 'name') else str(tx.type)
+
         row = [
             tx.transaction_date.strftime('%Y-%m-%d') if tx.transaction_date else "-",
             tx.merchant_name or "-",
-            "Expense",
-            tx.type or "DEBIT",
+            category_name, 
+            transaction_type, 
             f"{float(tx.amount):,.2f}"
         ]
         data.append(row)
         total_amount += float(tx.amount)
 
-    # 4. Styling Tabel
     table = Table(data, colWidths=[80, 180, 80, 60, 90])
     style = TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('ALIGN', (1, 1), (1, -1), 'LEFT'),
-        ('ALIGN', (-1, 1), (-1, -1), 'RIGHT'), 
+        ('ALIGN', (-1, 1), (-1, -1), 'RIGHT'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('FONTSIZE', (0, 0), (-1, 0), 12),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
