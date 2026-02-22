@@ -31,6 +31,8 @@ app.include_router(transactions.router, prefix=f"{settings.API_V1_STR}/transacti
 app.include_router(categories.router, prefix=f"{settings.API_V1_STR}/categories", tags=["categories"])
 app.include_router(exports.router, prefix=f"{settings.API_V1_STR}/exports", tags=["Exports"])
 app.include_router(analytics.router, prefix=f"{settings.API_V1_STR}/analytics", tags=["Analytics"])
+app.include_router(documents.router, prefix="/api/v1/documents", tags=["Documents"])
+app.include_router(transactions.router, prefix="/api/v1/transactions", tags=["Transactions"])
 
 @app.get("/health")
 async def health_check():

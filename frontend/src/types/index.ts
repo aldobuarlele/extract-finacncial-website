@@ -30,3 +30,33 @@ export interface UploadResponse {
   report_id: string;
   status: ReportStatus;
 }
+
+export interface DocumentHistory {
+  id: string;
+  filename: string;
+  status: ReportStatus;
+  created_at: string;
+}
+
+export interface Transaction {
+  id: string;
+  date: string | null;
+  merchant: string;
+  amount: number;
+  category: string;
+}
+
+export interface TransactionUpdatePayload {
+  category_name?: string;
+  merchant_name?: string;
+  transaction_date?: string;
+  amount?: number;
+}
+
+export interface TransactionCreatePayload {
+  report_id: string;
+  category_name: string;
+  merchant_name: string;
+  transaction_date: string;
+  amount: number;
+}

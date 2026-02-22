@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File, status
+from fastapi import APIRouter, Depends, UploadFile, File, status, HTTPException # FIX 1: Tambahkan HTTPException
 from sqlalchemy.orm import Session
 import uuid
 from app.db.database import get_db
@@ -47,3 +47,27 @@ async def upload_document(
         "report_id": new_report.id,
         "status": new_report.status
     }
+
+@router.get("/")
+async def get_all_documents(db: Session = Depends(get_db)):
+    """
+    Mengambil riwayat semua dokumen yang pernah diunggah.
+    """
+    docs = db.query(DocumentReport).order_by(DocumentReport.uploaded_at.desc()).all()
+    
+    return [
+        {
+            "id": doc.id,
+            "filename": doc.filename,
+            "status": doc.status,
+            "created_at": doc.uploaded_at 
+        }
+        for doc in docs
+    ]
+
+@router.get("/{report_id}")
+def get_report_status(report_id: uuid.UUID, db: Session = Depends(get_db)):
+    report = db.query(DocumentReport).filter(DocumentReport.id == report_id).first()
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found")
+    return report

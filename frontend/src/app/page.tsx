@@ -3,54 +3,75 @@
 import { useState, useEffect } from 'react';
 import { FileUploadZone } from '@/components/features/FileUploadZone';
 import { AnalyticsDashboard } from '@/components/features/AnalyticsDashboard';
+import { HistorySelector } from '@/components/features/HistorySelector';
+import { TransactionTable } from '@/components/features/TransactionTable';
 import { apiClient } from '@/lib/api';
 import { AnalyticsSummary } from '@/types';
 
 export default function Home() {
-  const [reportId, setReportId] = useState<string | null>(null);
+  const [activeReportId, setActiveReportId] = useState<string | null>(null);
   const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null);
+  
+  const [refreshHistoryTick, setRefreshHistoryTick] = useState(0);
 
-  const fetchAnalytics = async (id: string) => {
+  const refreshData = async (id: string) => {
     try {
       const data = await apiClient.getSummary(id);
       if (data.ai_usage.status === 'COMPLETED') {
         setAnalytics(data);
       }
     } catch (err) {
-      console.error("Belum siap:", err);
+      console.error("Data belum siap atau error:", err);
     }
   };
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (reportId && !analytics) {
-      fetchAnalytics(reportId); 
-      interval = setInterval(() => fetchAnalytics(reportId), 3000);
+    if (activeReportId && !analytics) {
+      refreshData(activeReportId);
+      interval = setInterval(() => refreshData(activeReportId), 3000);
     }
     return () => clearInterval(interval);
-  }, [reportId, analytics]);
+  }, [activeReportId, analytics]);
 
   return (
-    <main className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Expense Intelligence</h1>
+    <main className="min-h-screen bg-[#0f172a] p-8 text-slate-200">
+      <div className="max-w-6xl mx-auto space-y-10">
         
-        <FileUploadZone onUploadSuccess={(id) => {
-          setReportId(id);
-          setAnalytics(null);
-        }} />
-
-        {reportId && !analytics && (
-          <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg animate-pulse text-blue-700">
-            AI sedang menganalisis dokumen Anda (ID: {reportId})...
+        {/* Header & History Selector */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-slate-800 pb-10">
+          <div>
+            <h1 className="text-4xl font-black tracking-tight text-white">Expense <span className="text-indigo-500">Intelligence</span></h1>
+            <p className="text-slate-400 mt-2">Professional AI Financial Extraction System</p>
           </div>
-        )}
+          <HistorySelector 
+            activeId={activeReportId} 
+            refreshTrigger={refreshHistoryTick} 
+            onSelect={(id) => {
+              setActiveReportId(id);
+              setAnalytics(null);
+            }} 
+          />
+        </div>
 
+        {/* Upload Zone */}
+        <section>
+          <FileUploadZone onUploadSuccess={(id) => {
+            setActiveReportId(id);
+            setAnalytics(null);
+            setRefreshHistoryTick(prev => prev + 1); 
+          }} />
+        </section>
+
+        {/* Dashboard & Table */}
         {analytics && (
-          <div className="mt-12 animate-in fade-in duration-700">
-            <h2 className="text-2xl font-bold mb-6">Laporan: {analytics.filename}</h2>
+          <div className="space-y-12 animate-in fade-in duration-1000">
             <AnalyticsDashboard data={analytics} />
-            {/* Nanti kita tambahkan Chart di sini di Langkah 7.6 */}
+            
+            <TransactionTable 
+              reportId={analytics.report_id} 
+              onDataChange={() => refreshData(analytics.report_id)} 
+            />
           </div>
         )}
       </div>
