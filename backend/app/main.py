@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.api.v1 import categories, transactions, documents, exports
+from app.api.v1 import categories, transactions, documents, exports, analytics
 from app.api.middlewares.size_validator import MaxBodySizeMiddleware
 from app.db.database import engine, Base
 from app.models import domain 
@@ -30,6 +30,7 @@ app.include_router(documents.router, prefix=f"{settings.API_V1_STR}/documents", 
 app.include_router(transactions.router, prefix=f"{settings.API_V1_STR}/transactions", tags=["transactions"])
 app.include_router(categories.router, prefix=f"{settings.API_V1_STR}/categories", tags=["categories"])
 app.include_router(exports.router, prefix=f"{settings.API_V1_STR}/exports", tags=["Exports"])
+app.include_router(analytics.router, prefix=f"{settings.API_V1_STR}/analytics", tags=["Analytics"])
 
 @app.get("/health")
 async def health_check():
