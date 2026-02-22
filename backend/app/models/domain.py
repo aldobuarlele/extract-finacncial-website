@@ -26,6 +26,20 @@ class ExpenseCategory(Base):
     sub_categories = relationship("ExpenseCategory", backref="parent_category", remote_side=[id])
     transactions = relationship("ExpenseTransaction", back_populates="category")
 
+class ExpenseTransaction(Base):
+    __tablename__ = "expense_transactions"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    report_id = Column(UUID(as_uuid=True), ForeignKey("document_reports.id"), nullable=False)
+    category_id = Column(UUID(as_uuid=True), ForeignKey("expense_categories.id"), nullable=False)
+    transaction_date = Column(Date, nullable=False)
+    merchant_name = Column(String, nullable=False)
+    amount = Column(Numeric(12, 2), nullable=False)
+    type = Column(Enum(TransactionType), nullable=False)
+
+    report = relationship("DocumentReport", back_populates="transactions")
+    category = relationship("ExpenseCategory", back_populates="transactions")
+
 class DocumentReport(Base):
     __tablename__ = "document_reports"
 
@@ -42,17 +56,3 @@ class DocumentReport(Base):
     total_tokens = Column(Integer, nullable=True)
 
     transactions = relationship("ExpenseTransaction", back_populates="report")
-
-class ExpenseTransaction(Base):
-    __tablename__ = "expense_transactions"
-
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    report_id = Column(UUID(as_uuid=True), ForeignKey("document_reports.id"), nullable=False)
-    category_id = Column(UUID(as_uuid=True), ForeignKey("expense_categories.id"), nullable=False)
-    transaction_date = Column(Date, nullable=False)
-    merchant_name = Column(String, nullable=False)
-    amount = Column(Numeric(12, 2), nullable=False)
-    type = Column(Enum(TransactionType), nullable=False)
-
-    report = relationship("DocumentReport", back_populates="transactions")
-    category = relationship("ExpenseCategory", back_populates="transactions")
