@@ -18,6 +18,13 @@ class AnalyticsService:
          .filter(ExpenseTransaction.report_id == report_id) \
          .group_by(ExpenseCategory.name).all()
 
+        daily_trends = db.query(
+            ExpenseTransaction.transaction_date,
+            func.sum(ExpenseTransaction.amount).label("daily_total")
+        ).filter(ExpenseTransaction.report_id == report_id) \
+         .group_by(ExpenseTransaction.transaction_date) \
+         .order_by(ExpenseTransaction.transaction_date).all()
+
         report = db.query(DocumentReport).filter(DocumentReport.id == report_id).first()
 
         return {
@@ -31,6 +38,10 @@ class AnalyticsService:
             "category_distribution": {
                 name: float(amount) for name, amount in category_dist
             },
+            # Data untuk Line Chart
+            "daily_trends": [
+                {"date": str(date), "total": float(total)} for date, total in daily_trends
+            ],
             "ai_usage": {
                 "total_tokens": report.total_tokens,
                 "status": report.status
