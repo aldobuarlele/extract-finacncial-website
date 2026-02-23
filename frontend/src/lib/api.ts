@@ -67,4 +67,21 @@ export const apiClient = {
     }
     return res.json();
   },
+
+  downloadExport: async (reportId: string, format: 'pdf' | 'excel') => {
+    const endpoint = format === 'pdf' ? `/exports/pdf/${reportId}` : `/exports/excel/${reportId}`;
+    const res = await fetch(`${BASE_URL}${endpoint}`);
+    
+    if (!res.ok) throw new Error(`Gagal mengunduh file ${format}`);
+    
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Expense_Report_${reportId.substring(0,8)}.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  }
 };
