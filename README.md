@@ -2,6 +2,11 @@
 
 An automated expense tracking and classification system. It extracts transactional data from bank statement PDFs or screenshots using native text extraction and Vision AI, strictly classifying them into user-defined categories.
 
+## Directory Structure
+
+* `/backend` - Contains the FastAPI application, background tasks, and core extraction logic.
+* `/frontend` - Contains the Next.js user interface.
+
 ## System Architecture
 
 This project utilizes a Monorepo architecture separating the backend API and frontend UI, orchestrated via Docker.
@@ -13,10 +18,6 @@ This project utilizes a Monorepo architecture separating the backend API and fro
 * **AI Engine:** Integration with LLM/Vision capabilities for OCR fallback and structured JSON classification.
 
 
-## Directory Structure
-
-* `/backend` - Contains the FastAPI application, background tasks, and core extraction logic.
-* `/frontend` - Contains the Next.js user interface.
 
 ## Local Development Setup (Manual)
 
