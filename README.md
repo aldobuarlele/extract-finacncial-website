@@ -2,6 +2,11 @@
 
 An automated expense tracking and classification system. It extracts transactional data from bank statement PDFs or screenshots using native text extraction and Vision AI, strictly classifying them into user-defined categories.
 
+## Directory Structure
+
+* `/backend` - Contains the FastAPI application, background tasks, and core extraction logic.
+* `/frontend` - Contains the Next.js user interface.
+
 ## Local Development Setup (Manual)
 
 ### Backend
@@ -12,11 +17,6 @@ An automated expense tracking and classification system. It extracts transaction
 ### Frontend
 1. `cd frontend`
 2. `npm run dev`
-
-## Directory Structure
-
-* `/backend` - Contains the FastAPI application, background tasks, and core extraction logic.
-* `/frontend` - Contains the Next.js user interface.
 
 ## System Architecture
 
